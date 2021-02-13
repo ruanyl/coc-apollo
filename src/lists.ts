@@ -2,7 +2,7 @@ import { BasicList, fetch, ListAction, ListContext, ListItem, Neovim, window } f
 import { print } from 'graphql';
 import { ApolloConfigFormat } from './apollo';
 import { reloadSchema } from './reloadSchema';
-import { SCHEMA_TAGS_AND_FIELD_STATS } from './schemaTagsAndFieldStats';
+import { SCHEMA_TAGS } from './schemaTags';
 
 type GraphVariant = {
   name: string;
@@ -18,8 +18,8 @@ export async function loadSchemaVariants(apolloConfig: ApolloConfigFormat): Prom
         'x-api-key': apolloConfig?.engine?.apiKey,
       },
       data: {
-        operationName: 'SchemaTagsAndFieldStats',
-        query: print(SCHEMA_TAGS_AND_FIELD_STATS),
+        operationName: 'SchemaTags',
+        query: print(SCHEMA_TAGS),
         variables: { id: apolloConfig?.client.service },
       },
     });

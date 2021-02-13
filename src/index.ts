@@ -16,13 +16,17 @@ import {
 } from 'coc.nvim';
 import ApolloVariantList from './lists';
 import { loadConfig } from './loadConfig';
-import { reloadSchema } from './reloadSchema';
+import { loadFieldStats } from './loadFieldStats';
+import { generateDecorations } from './parse';
+import { reloadSchema, loadedSchema } from './reloadSchema';
 
 export async function activate(context: ExtensionContext): Promise<void> {
   const apolloConfig = await loadConfig({ configPath: workspace.root });
+  const virtualTextSrcId = await workspace.nvim.createNamespace('coc-apollo-graphql');
 
   if (apolloConfig) {
     await reloadSchema(apolloConfig, 'current');
+    const fieldStats = await loadFieldStats(apolloConfig);
 
     context.subscriptions.push(listManager.registerList(new ApolloVariantList(workspace.nvim, apolloConfig)));
 
@@ -49,10 +53,24 @@ export async function activate(context: ExtensionContext): Promise<void> {
       ),
 
       workspace.registerAutocmd({
-        event: 'InsertLeave',
+        event: ['BufEnter', 'BufWritePost'],
         request: true,
-        callback: () => {
-          window.showMessage(`registerAutocmd on InsertLeave`);
+        callback: async () => {
+          console.error('FieldStats: ', fieldStats);
+          if (loadedSchema.schema) {
+            const doc = await workspace.document;
+            await doc.buffer.request('nvim_buf_clear_namespace', [virtualTextSrcId, 0, -1]);
+            console.error('doc.content: ', doc.content);
+            if (doc.content.trim() !== '') {
+              const decorations = generateDecorations(doc.content, doc.uri, loadedSchema.schema, fieldStats);
+              console.error('decorations: ', JSON.stringify(decorations));
+              decorations.forEach(async (d) => {
+                if (d.document === doc.uri) {
+                  await doc.buffer.setVirtualText(virtualTextSrcId, d.range.start.line, [[d.message, 'CocCodeLens']]);
+                }
+              });
+            }
+          }
         },
       })
     );

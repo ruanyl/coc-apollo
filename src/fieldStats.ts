@@ -1,11 +1,8 @@
 import gql from 'graphql-tag';
 
-export const SCHEMA_TAGS_AND_FIELD_STATS = gql`
-  query SchemaTagsAndFieldStats($id: ID!) {
+export const FIELD_STATS = gql`
+  query FieldStats($id: ID!) {
     service(id: $id) {
-      variants {
-        name
-      }
       stats(from: "-86400", to: "-0") {
         fieldStats {
           groupBy {

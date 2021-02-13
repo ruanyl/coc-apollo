@@ -1,6 +1,6 @@
 import { fetch, window, workspace } from 'coc.nvim';
 import fs from 'fs';
-import { print } from 'graphql';
+import { buildSchema, GraphQLSchema, print } from 'graphql';
 import { ApolloConfigFormat } from './apollo';
 import { SCHEMA_DOCUMENT } from './schemaDocument';
 
@@ -41,6 +41,11 @@ directive @connection(
 ) on FIELD
 `;
 
+export const loadedSchema: { source: string; schema: GraphQLSchema | null } = {
+  source: '',
+  schema: null,
+};
+
 export async function reloadSchema(apolloConfig: ApolloConfigFormat, variant: string) {
   try {
     // Load schema Introspection, variants & stats
@@ -57,11 +62,11 @@ export async function reloadSchema(apolloConfig: ApolloConfigFormat, variant: st
       },
     });
 
+    loadedSchema.source = (res as any).data.service.schema.document + '\n' + apolloClientSchema;
+    loadedSchema.schema = buildSchema(loadedSchema.source);
+
     // Write schema Introspection
-    fs.writeFileSync(
-      `${workspace.root}/schema.graphql`,
-      (res as any).data.service.schema.document + '\n' + apolloClientSchema
-    );
+    fs.writeFileSync(`${workspace.root}/schema.graphql`, loadedSchema.source);
     window.showMessage(`Schema(${variant}) loaded: ${workspace.root}/schema.graphql`);
   } catch (e) {
     window.showMessage(`${e}`);
