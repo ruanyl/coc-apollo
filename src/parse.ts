@@ -1,6 +1,6 @@
 import { parseDocument } from 'graphql-language-service-server';
 import { parse, Source, TypeInfo, visit, visitWithTypeInfo, GraphQLSchema } from 'graphql';
-import { FieldStats } from './loadFieldStats';
+import { FieldStats } from './reloadFieldStats';
 import { formatMS } from './formatMS';
 import { rangeForASTNode } from './source.utils';
 import { Range } from 'coc.nvim';
@@ -22,7 +22,6 @@ interface Decoration {
 
 export function generateDecorations(text: string, uri: string, schema: GraphQLSchema, fieldStats: FieldStats) {
   const astOfDocument = stringToAST(text, uri);
-  console.error('astOfDocument', astOfDocument);
 
   const decorations: Decoration[] = [];
   for (const ast of astOfDocument) {
@@ -31,7 +30,6 @@ export function generateDecorations(text: string, uri: string, schema: GraphQLSc
       ast,
       visitWithTypeInfo(typeInfo, {
         enter: (node) => {
-          console.error('AST node: ', node);
           if (node.kind == 'Field' && typeInfo.getParentType()) {
             const parentName = typeInfo.getParentType()!.name;
             const parentEngineStat = fieldStats.get(parentName);

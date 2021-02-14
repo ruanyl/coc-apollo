@@ -7,10 +7,14 @@ export type GraphVariant = {
   name: string;
 };
 
+export const cachedVariants = {
+  variants: Array<GraphVariant>(),
+};
+
 export async function reloadSchemaVariants(apolloConfig: ApolloConfigFormat): Promise<GraphVariant[]> {
   try {
     // Load schema variants & stats
-    window.showMessage(`Loading...`);
+    window.showMessage(`Variants Loading...`);
     const res = await fetch('https://graphql.api.apollographql.com/api/graphql', {
       method: 'POST',
       headers: {
@@ -22,8 +26,10 @@ export async function reloadSchemaVariants(apolloConfig: ApolloConfigFormat): Pr
         variables: { id: apolloConfig?.client.service },
       },
     });
-    window.showMessage('');
-    return (res as any).data.service.variants;
+    window.showMessage('Variants Loaded!');
+    const variants = (res as any).data.service.variants;
+    cachedVariants.variants = variants;
+    return variants;
   } catch (e) {
     window.showMessage(`${e}`);
     return [];

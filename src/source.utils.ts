@@ -11,7 +11,6 @@ export function positionFromSourceLocation(source: Source, location: SourceLocat
 export function rangeForASTNode(node: ASTNode): Range {
   const location = node.loc!;
   const source = location.source;
-  console.error('source location: ', source);
 
   return Range.create(
     positionFromSourceLocation(source, getLocation(source, location.start)),

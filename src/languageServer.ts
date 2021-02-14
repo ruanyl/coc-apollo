@@ -5,7 +5,7 @@ function startLanguageServer() {
     method: 'node',
   })
     .then(() => {})
-    .catch((error) => console.log(error));
+    .catch((error) => console.error(error));
 }
 
 startLanguageServer();

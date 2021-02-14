@@ -1,6 +1,5 @@
 import {
   commands,
-  CompleteResult,
   ExtensionContext,
   LanguageClient,
   LanguageClientOptions,
@@ -9,16 +8,16 @@ import {
   RevealOutputChannelOn,
   ServerOptions,
   services,
-  sources,
   TransportKind,
   window,
   workspace,
 } from 'coc.nvim';
 import ApolloVariantList from './lists';
 import { loadConfig } from './loadConfig';
-import { reloadFieldStats } from './reloadFieldStats';
+import { cachedFieldStats, reloadFieldStats } from './reloadFieldStats';
 import { generateDecorations } from './parse';
 import { reloadSchema, cachedSchema } from './reloadSchema';
+import { reloadSchemaVariants } from './reloadSchemaVariants';
 
 export async function activate(context: ExtensionContext): Promise<void> {
   const apolloConfig = await loadConfig({ configPath: workspace.root });
@@ -26,44 +25,32 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   if (apolloConfig) {
     await reloadSchema(apolloConfig, 'current');
-    const fieldStats = await reloadFieldStats(apolloConfig);
 
     context.subscriptions.push(listManager.registerList(new ApolloVariantList(workspace.nvim, apolloConfig)));
 
     context.subscriptions.push(
-      commands.registerCommand('coc-apollo-graphql.Command', async () => {
-        window.showMessage(`coc-apollo-graphql Commands works!`);
+      commands.registerCommand('apollo.reload.variants', async () => {
+        await reloadSchemaVariants(apolloConfig);
       }),
 
-      sources.createSource({
-        name: 'coc-apollo-graphql completion source', // unique id
-        doComplete: async () => {
-          const items = await getCompletionItems();
-          return items;
-        },
+      commands.registerCommand('apollo.reload.stats', async () => {
+        await reloadFieldStats(apolloConfig);
       }),
-
-      workspace.registerKeymap(
-        ['n'],
-        'apollo-graphql-keymap',
-        async () => {
-          window.showMessage(`registerKeymap`);
-        },
-        { sync: false }
-      ),
 
       workspace.registerAutocmd({
         event: ['BufEnter', 'BufWritePost'],
         request: true,
         callback: async () => {
-          console.error('FieldStats: ', fieldStats);
           if (cachedSchema.schema) {
             const doc = await workspace.document;
             await doc.buffer.request('nvim_buf_clear_namespace', [virtualTextSrcId, 0, -1]);
-            console.error('doc.content: ', doc.content);
             if (doc.content.trim() !== '') {
-              const decorations = generateDecorations(doc.content, doc.uri, cachedSchema.schema, fieldStats);
-              console.error('decorations: ', JSON.stringify(decorations));
+              const decorations = generateDecorations(
+                doc.content,
+                doc.uri,
+                cachedSchema.schema,
+                cachedFieldStats.fieldStats
+              );
               decorations.forEach(async (d) => {
                 if (d.document === doc.uri) {
                   await doc.buffer.setVirtualText(virtualTextSrcId, d.range.start.line, [[d.message, 'CocCodeLens']]);
@@ -123,19 +110,4 @@ export async function activate(context: ExtensionContext): Promise<void> {
   );
 
   context.subscriptions.push(services.registLanguageClient(client));
-}
-
-async function getCompletionItems(): Promise<CompleteResult> {
-  return {
-    items: [
-      {
-        word: 'TestCompletionItem 1',
-        menu: '[coc-apollo-graphql]',
-      },
-      {
-        word: 'TestCompletionItem 2',
-        menu: '[coc-apollo-graphql]',
-      },
-    ],
-  };
 }

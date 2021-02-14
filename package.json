@@ -53,8 +53,12 @@
     },
     "commands": [
       {
-        "command": "coc-apollo-graphql.Command",
-        "title": "coc-apollo-graphql command title"
+        "command": "apollo.reload.variants",
+        "title": "Reload Apollo graphql schema variant list"
+      },
+      {
+        "command": "apollo.reload.stats",
+        "title": "Reload Apollo field stats"
       }
     ]
   },

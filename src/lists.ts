@@ -1,10 +1,10 @@
 import { BasicList, ListAction, ListContext, ListItem, Neovim } from 'coc.nvim';
 import { ApolloConfigFormat } from './apollo';
 import { reloadSchema } from './reloadSchema';
-import { reloadSchemaVariants } from './reloadSchemaVariants';
+import { cachedVariants, reloadSchemaVariants } from './reloadSchemaVariants';
 
 export default class ApolloVariantList extends BasicList {
-  public readonly name = 'apollo_schema_variants';
+  public readonly name = 'variants';
   public readonly description = 'CocList for Apollo schema variants';
   public readonly defaultAction = 'open';
   public actions: ListAction[] = [];
@@ -20,7 +20,10 @@ export default class ApolloVariantList extends BasicList {
   }
 
   public async loadItems(context: ListContext): Promise<ListItem[]> {
-    const variants = await reloadSchemaVariants(this.apolloConfig);
+    let variants = cachedVariants.variants;
+    if (variants.length === 0) {
+      variants = await reloadSchemaVariants(this.apolloConfig);
+    }
 
     return variants.map((variant) => ({
       label: variant.name,
