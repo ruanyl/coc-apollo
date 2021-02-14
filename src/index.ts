@@ -44,6 +44,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
           if (cachedSchema.schema) {
             const doc = await workspace.document;
             await doc.buffer.request('nvim_buf_clear_namespace', [virtualTextSrcId, 0, -1]);
+            if (cachedFieldStats.fieldStats.size === 0) {
+              await reloadFieldStats(apolloConfig);
+            }
             if (doc.content.trim() !== '') {
               const decorations = generateDecorations(
                 doc.content,
