@@ -16,10 +16,38 @@ coc.nvim extension for Apollo GraphQL
 ### Service project
 TODO...
 
+## Setup
+1. Use [vim-graphql](https://github.com/jparise/vim-graphql) for syntax highlighting
+2. Add `APOLLO_KEY` to `.env`
+3. Add [graphql-config](https://github.com/kamilkisiela/graphql-config) for graphql language server
+
+The plugin will download schema from remote and and generate `schema.graphql` file
+
+Example `graphql.config.json`
+```json
+{
+  "schema": "schema.graphql",
+  "documents": "src/**/*.{ts}"
+}
+```
+
 ## Lists
 
-Show variant list: `:CocList variants`
+Show variant list: 
+```
+:CocList variants
+```
 
+## Commands
+Reload Apollo graphql schema variant list
+```
+:CocCommand apollo.reload.variants
+```
+
+Reload Apollo field stats
+```
+:CocCommand apollo.reload.stats
+```
 ## License
 
 MIT
