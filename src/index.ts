@@ -16,9 +16,9 @@ import {
 } from 'coc.nvim';
 import ApolloVariantList from './lists';
 import { loadConfig } from './loadConfig';
-import { loadFieldStats } from './loadFieldStats';
+import { reloadFieldStats } from './reloadFieldStats';
 import { generateDecorations } from './parse';
-import { reloadSchema, loadedSchema } from './reloadSchema';
+import { reloadSchema, cachedSchema } from './reloadSchema';
 
 export async function activate(context: ExtensionContext): Promise<void> {
   const apolloConfig = await loadConfig({ configPath: workspace.root });
@@ -26,7 +26,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   if (apolloConfig) {
     await reloadSchema(apolloConfig, 'current');
-    const fieldStats = await loadFieldStats(apolloConfig);
+    const fieldStats = await reloadFieldStats(apolloConfig);
 
     context.subscriptions.push(listManager.registerList(new ApolloVariantList(workspace.nvim, apolloConfig)));
 
@@ -57,12 +57,12 @@ export async function activate(context: ExtensionContext): Promise<void> {
         request: true,
         callback: async () => {
           console.error('FieldStats: ', fieldStats);
-          if (loadedSchema.schema) {
+          if (cachedSchema.schema) {
             const doc = await workspace.document;
             await doc.buffer.request('nvim_buf_clear_namespace', [virtualTextSrcId, 0, -1]);
             console.error('doc.content: ', doc.content);
             if (doc.content.trim() !== '') {
-              const decorations = generateDecorations(doc.content, doc.uri, loadedSchema.schema, fieldStats);
+              const decorations = generateDecorations(doc.content, doc.uri, cachedSchema.schema, fieldStats);
               console.error('decorations: ', JSON.stringify(decorations));
               decorations.forEach(async (d) => {
                 if (d.document === doc.uri) {

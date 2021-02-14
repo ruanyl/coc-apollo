@@ -1,35 +1,7 @@
-import { BasicList, fetch, ListAction, ListContext, ListItem, Neovim, window } from 'coc.nvim';
-import { print } from 'graphql';
+import { BasicList, ListAction, ListContext, ListItem, Neovim } from 'coc.nvim';
 import { ApolloConfigFormat } from './apollo';
 import { reloadSchema } from './reloadSchema';
-import { SCHEMA_TAGS } from './schemaTags';
-
-type GraphVariant = {
-  name: string;
-};
-
-export async function loadSchemaVariants(apolloConfig: ApolloConfigFormat): Promise<GraphVariant[]> {
-  try {
-    // Load schema variants & stats
-    window.showMessage(`Loading...`);
-    const res = await fetch('https://graphql.api.apollographql.com/api/graphql', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apolloConfig?.engine?.apiKey,
-      },
-      data: {
-        operationName: 'SchemaTags',
-        query: print(SCHEMA_TAGS),
-        variables: { id: apolloConfig?.client.service },
-      },
-    });
-    window.showMessage('');
-    return (res as any).data.service.variants;
-  } catch (e) {
-    window.showMessage(`${e}`);
-    return [];
-  }
-}
+import { reloadSchemaVariants } from './reloadSchemaVariants';
 
 export default class ApolloVariantList extends BasicList {
   public readonly name = 'apollo_schema_variants';
@@ -48,7 +20,7 @@ export default class ApolloVariantList extends BasicList {
   }
 
   public async loadItems(context: ListContext): Promise<ListItem[]> {
-    const variants = await loadSchemaVariants(this.apolloConfig);
+    const variants = await reloadSchemaVariants(this.apolloConfig);
 
     return variants.map((variant) => ({
       label: variant.name,

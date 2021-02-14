@@ -1,7 +1,7 @@
 import { fetch } from 'coc.nvim';
 import { print } from 'graphql';
 import { ApolloConfigFormat } from './apollo';
-import { FIELD_STATS } from './fieldStats';
+import { FIELD_STATS } from './operations.graphql';
 
 export type FieldStats = Map<string, Map<string, number | null>>;
 
@@ -9,7 +9,7 @@ export const cachedFieldStats: { fieldStats: FieldStats } = {
   fieldStats: new Map(),
 };
 
-export async function loadFieldStats(apolloConfig: ApolloConfigFormat) {
+export async function reloadFieldStats(apolloConfig: ApolloConfigFormat) {
   // Load schema stats
   const res = await fetch('https://graphql.api.apollographql.com/api/graphql', {
     method: 'POST',

@@ -18,3 +18,23 @@ export const FIELD_STATS = gql`
     }
   }
 `;
+
+export const SCHEMA_TAGS = gql`
+  query SchemaTags($id: ID!) {
+    service(id: $id) {
+      variants {
+        name
+      }
+    }
+  }
+`;
+
+export const SCHEMA_DOCUMENT = gql`
+  query schemaDocument($id: ID!, $tag: String!) {
+    service(id: $id) {
+      schema(tag: $tag) {
+        document
+      }
+    }
+  }
+`;
