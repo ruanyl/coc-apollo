@@ -21,7 +21,7 @@ TODO...
 2. Add `APOLLO_KEY` to `.env`
 3. Add [graphql-config](https://github.com/kamilkisiela/graphql-config) for graphql language server
 
-The plugin will download schema from remote for now, it generates `schema.graphql` file. So you have to specify `"schema": "schema.graphql"` in the config.
+The plugin will download schema from Apollo Schema Registry, it generates `schema.graphql` file. So you have to specify `"schema": "schema.graphql"` in the config.
 
 Example `graphql.config.json`
 ```json
