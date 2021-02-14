@@ -1,4 +1,4 @@
-# coc-apollo-graphql
+# coc-apollo-graphql (WIP)
 
 coc.nvim extension for Apollo GraphQL
 
@@ -6,13 +6,19 @@ coc.nvim extension for Apollo GraphQL
 
 `:CocInstall coc-apollo-graphql`
 
-## Keymaps
+## Features
+### Client Project
+1. [GraphQL Language Server](https://github.com/graphql/graphiql/blob/main/packages/graphql-language-service-server/README.md): autocomplete, diagnostics...
+2. Apollo GraphQL integration
+    - Graph variants switching
+    - Performance stats
 
-`nmap <silent> <C-l> <Plug>(coc-coc-apollo-graphql-keymap)`
+### Service project
+TODO...
 
 ## Lists
 
-`:CocList demo_list`
+Show variant list: `:CocList variants`
 
 ## License
 
