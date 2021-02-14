@@ -19,6 +19,8 @@ import { generateDecorations } from './parse';
 import { reloadSchema, cachedSchema } from './reloadSchema';
 import { reloadSchemaVariants } from './reloadSchemaVariants';
 
+const SupportedFiletype = ['graphql', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact'];
+
 export async function activate(context: ExtensionContext): Promise<void> {
   const apolloConfig = await loadConfig({ configPath: workspace.root });
   const virtualTextSrcId = await workspace.nvim.createNamespace('coc-apollo-graphql');
@@ -43,6 +45,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
         callback: async () => {
           if (cachedSchema.schema) {
             const doc = await workspace.document;
+            if (!SupportedFiletype.includes(doc.filetype)) {
+              return;
+            }
             await doc.buffer.request('nvim_buf_clear_namespace', [virtualTextSrcId, 0, -1]);
             if (cachedFieldStats.fieldStats.size === 0) {
               await reloadFieldStats(apolloConfig);
