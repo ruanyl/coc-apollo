@@ -9,9 +9,10 @@ coc.nvim extension for Apollo GraphQL. Still work in progress, feedbacks and PRs
 ## Features
 ### Client Project
 1. [GraphQL Language Server](https://github.com/graphql/graphiql/blob/main/packages/graphql-language-service-server/README.md): autocomplete, diagnostics...
-2. Apollo GraphQL integration
+2. Apollo GraphQL integration (Use the Apollo schema registry)
     - Graph variants switching
     - Performance stats (require `virtual text`)
+3. Support loading schema from a remote endpoint, [example](https://www.apollographql.com/docs/devtools/apollo-config/#option-2-link-a-schema-from-a-remote-endpoint)
 
 ### Service project
 TODO...
