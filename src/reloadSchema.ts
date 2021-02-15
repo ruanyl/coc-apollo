@@ -12,6 +12,7 @@ import {
 import { ApolloConfigFormat } from './apollo';
 import { ApolloGraphQLEndpoint } from './config';
 import { SCHEMA_DOCUMENT } from './operations.graphql';
+import { getServiceIDFromConfig } from './utils';
 
 export const apolloClientSchema = `#graphql
 """
@@ -59,7 +60,7 @@ export async function reloadSchemaFromEngine(apolloConfig: ApolloConfigFormat, v
   const serviceConfig = apolloConfig.client.service;
   if (typeof serviceConfig === 'string') {
     // Handle format: schema@current
-    const [serviceID] = serviceConfig.split('@');
+    const serviceID = getServiceIDFromConfig(serviceConfig);
     try {
       // Load schema Introspection, variants & stats
       window.showMessage(`Loading schema of: ${variant}...`);
@@ -82,6 +83,8 @@ export async function reloadSchemaFromEngine(apolloConfig: ApolloConfigFormat, v
         // Write schema to file for language server
         fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
         window.showMessage(`Schema(${variant}) loaded: ${workspace.root}/schema.graphql`);
+      } else {
+        console.error(errors);
       }
     } catch (e) {
       console.error(e);

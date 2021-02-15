@@ -5,3 +5,8 @@ export function getServiceFromKey(key?: string) {
   }
   return;
 }
+
+export function getServiceIDFromConfig(serviceConfigStr: string) {
+  const [serviceID] = serviceConfigStr.split('@');
+  return serviceID;
+}
