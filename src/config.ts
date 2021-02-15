@@ -23,3 +23,5 @@ export const DefaultServiceConfig = {
     url: 'http://localhost:4000/graphql',
   },
 };
+
+export const ApolloGraphQLEndpoint = 'https://graphql.api.apollographql.com/api/graphql';

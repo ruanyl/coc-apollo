@@ -10,6 +10,7 @@ import {
   printSchema,
 } from 'graphql';
 import { ApolloConfigFormat } from './apollo';
+import { ApolloGraphQLEndpoint } from './config';
 import { SCHEMA_DOCUMENT } from './operations.graphql';
 
 export const apolloClientSchema = `#graphql
@@ -55,32 +56,37 @@ export const cachedSchema: { source: string; schema: GraphQLSchema | null } = {
 };
 
 export async function reloadSchemaFromEngine(apolloConfig: ApolloConfigFormat, variant: string) {
-  try {
-    // Load schema Introspection, variants & stats
-    window.showMessage(`Loading schema of: ${variant}...`);
-    const { data, errors } = (await fetch('https://graphql.api.apollographql.com/api/graphql', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apolloConfig.engine?.apiKey,
-      },
-      data: {
-        operationName: 'schemaDocument',
-        query: print(SCHEMA_DOCUMENT),
-        variables: { id: apolloConfig?.client.service, tag: variant },
-      },
-    })) as any;
+  const serviceConfig = apolloConfig.client.service;
+  if (typeof serviceConfig === 'string') {
+    // Handle format: schema@current
+    const [serviceID] = serviceConfig.split('@');
+    try {
+      // Load schema Introspection, variants & stats
+      window.showMessage(`Loading schema of: ${variant}...`);
+      const { data, errors } = (await fetch(ApolloGraphQLEndpoint, {
+        method: 'POST',
+        headers: {
+          'x-api-key': apolloConfig.engine?.apiKey,
+        },
+        data: {
+          operationName: 'schemaDocument',
+          query: print(SCHEMA_DOCUMENT),
+          variables: { id: serviceID, tag: variant },
+        },
+      })) as any;
 
-    if (!errors) {
-      cachedSchema.source = data.service.schema.document + '\n' + apolloClientSchema;
-      cachedSchema.schema = buildSchema(cachedSchema.source);
+      if (!errors) {
+        cachedSchema.source = data.service.schema.document + '\n' + apolloClientSchema;
+        cachedSchema.schema = buildSchema(cachedSchema.source);
 
-      // Write schema to file for language server
-      fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
-      window.showMessage(`Schema(${variant}) loaded: ${workspace.root}/schema.graphql`);
+        // Write schema to file for language server
+        fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
+        window.showMessage(`Schema(${variant}) loaded: ${workspace.root}/schema.graphql`);
+      }
+    } catch (e) {
+      console.error(e);
+      window.showMessage(`Failed to load schema of variant: ${variant}`);
     }
-  } catch (e) {
-    console.error(e);
-    window.showMessage(`Failed to load schema of variant: ${variant}`);
   }
 }
 

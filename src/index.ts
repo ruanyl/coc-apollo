@@ -28,7 +28,12 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   if (apolloConfig) {
     if (typeof apolloConfig.client.service === 'string') {
-      await reloadSchemaFromEngine(apolloConfig, 'current');
+      let defaultVariant = 'current';
+      if (apolloConfig.client.service.includes('@')) {
+        defaultVariant = apolloConfig.client.service.split('@')[1];
+      }
+
+      await reloadSchemaFromEngine(apolloConfig, defaultVariant);
 
       // For project configured with Apollo service
       // 1. Register variants list

@@ -1,6 +1,7 @@
 import { fetch, window } from 'coc.nvim';
 import { print } from 'graphql';
 import { ApolloConfigFormat } from './apollo';
+import { ApolloGraphQLEndpoint } from './config';
 import { SCHEMA_TAGS } from './operations.graphql';
 
 export type GraphVariant = {
@@ -15,7 +16,7 @@ export async function reloadSchemaVariants(apolloConfig: ApolloConfigFormat): Pr
   try {
     // Load schema variants & stats
     window.showMessage(`Variants Loading...`);
-    const { data, errors } = (await fetch('https://graphql.api.apollographql.com/api/graphql', {
+    const { data, errors } = (await fetch(ApolloGraphQLEndpoint, {
       method: 'POST',
       headers: {
         'x-api-key': apolloConfig?.engine?.apiKey,
