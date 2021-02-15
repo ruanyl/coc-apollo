@@ -69,6 +69,7 @@ export async function reloadSchema(apolloConfig: ApolloConfigFormat, variant: st
     fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
     window.showMessage(`Schema(${variant}) loaded: ${workspace.root}/schema.graphql`);
   } catch (e) {
-    window.showMessage(`${e}`);
+    console.error(e);
+    window.showMessage(`Failed to load schema of variant: ${variant}`);
   }
 }
