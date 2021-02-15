@@ -17,9 +17,10 @@ coc.nvim extension for Apollo GraphQL. Still work in progress, feedbacks and PRs
 TODO...
 
 ## Setup
-1. Use [vim-graphql](https://github.com/jparise/vim-graphql) for syntax highlighting
-2. Add `APOLLO_KEY` to `.env`
-3. Add [graphql-config](https://github.com/kamilkisiela/graphql-config) for graphql language server
+1. Add `APOLLO_KEY` to `.env`
+2. Add `apollo.config.json` or `apollo.config.js`
+2. Add [graphql-config](https://github.com/kamilkisiela/graphql-config) for graphql language server
+3. (Optional) Use [vim-graphql](https://github.com/jparise/vim-graphql) for syntax highlighting
 
 The plugin will download schema from Apollo Schema Registry, it generates `schema.graphql` file. So you have to specify `"schema": "schema.graphql"` in the config.
 

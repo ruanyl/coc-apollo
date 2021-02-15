@@ -1,5 +1,5 @@
 export type ApolloConfigFormat = ApolloClientConfigFormat & {
-  engine?: {
+  engine: {
     apiKey: string;
   };
 };
