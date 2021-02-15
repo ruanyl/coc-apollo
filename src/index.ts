@@ -16,7 +16,7 @@ import ApolloVariantList from './lists';
 import { loadConfig } from './loadConfig';
 import { cachedFieldStats, reloadFieldStats } from './reloadFieldStats';
 import { generateDecorations } from './parse';
-import { reloadSchema, cachedSchema } from './reloadSchema';
+import { reloadSchemaFromEngine, cachedSchema, reloadSchemaFromEndpoint } from './reloadSchema';
 import { reloadSchemaVariants } from './reloadSchemaVariants';
 
 const SupportedFiletype = ['graphql', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact'];
@@ -24,51 +24,60 @@ const SupportedFiletype = ['graphql', 'javascript', 'javascriptreact', 'typescri
 export async function activate(context: ExtensionContext): Promise<void> {
   const apolloConfig = await loadConfig({ configPath: workspace.root });
   const virtualTextSrcId = await workspace.nvim.createNamespace('coc-apollo');
+  console.error('apolloConfig: ', apolloConfig);
 
   if (apolloConfig) {
-    await reloadSchema(apolloConfig, 'current');
+    if (typeof apolloConfig.client.service === 'string') {
+      await reloadSchemaFromEngine(apolloConfig, 'current');
 
-    context.subscriptions.push(listManager.registerList(new ApolloVariantList(workspace.nvim, apolloConfig)));
+      // For project configured with Apollo service
+      // 1. Register variants list
+      // 2. Register commands of reloading field stats and variants
+      // 3. Register autocmd of updating field stats on document
+      context.subscriptions.push(listManager.registerList(new ApolloVariantList(workspace.nvim, apolloConfig)));
 
-    context.subscriptions.push(
-      commands.registerCommand('apollo.reload.variants', async () => {
-        await reloadSchemaVariants(apolloConfig);
-      }),
+      context.subscriptions.push(
+        commands.registerCommand('apollo.reload.variants', async () => {
+          await reloadSchemaVariants(apolloConfig);
+        }),
 
-      commands.registerCommand('apollo.reload.stats', async () => {
-        await reloadFieldStats(apolloConfig);
-      }),
+        commands.registerCommand('apollo.reload.stats', async () => {
+          await reloadFieldStats(apolloConfig);
+        }),
 
-      workspace.registerAutocmd({
-        event: ['BufEnter', 'BufWritePost'],
-        request: true,
-        callback: async () => {
-          if (cachedSchema.schema) {
-            const doc = await workspace.document;
-            if (!SupportedFiletype.includes(doc.filetype)) {
-              return;
+        workspace.registerAutocmd({
+          event: ['BufEnter', 'BufWritePost'],
+          request: true,
+          callback: async () => {
+            if (cachedSchema.schema) {
+              const doc = await workspace.document;
+              if (!SupportedFiletype.includes(doc.filetype)) {
+                return;
+              }
+              await doc.buffer.request('nvim_buf_clear_namespace', [virtualTextSrcId, 0, -1]);
+              if (cachedFieldStats.fieldStats.size === 0) {
+                await reloadFieldStats(apolloConfig);
+              }
+              if (doc.content.trim() !== '') {
+                const decorations = generateDecorations(
+                  doc.content,
+                  doc.uri,
+                  cachedSchema.schema,
+                  cachedFieldStats.fieldStats
+                );
+                decorations.forEach(async (d) => {
+                  if (d.document === doc.uri) {
+                    await doc.buffer.setVirtualText(virtualTextSrcId, d.range.start.line, [[d.message, 'CocCodeLens']]);
+                  }
+                });
+              }
             }
-            await doc.buffer.request('nvim_buf_clear_namespace', [virtualTextSrcId, 0, -1]);
-            if (cachedFieldStats.fieldStats.size === 0) {
-              await reloadFieldStats(apolloConfig);
-            }
-            if (doc.content.trim() !== '') {
-              const decorations = generateDecorations(
-                doc.content,
-                doc.uri,
-                cachedSchema.schema,
-                cachedFieldStats.fieldStats
-              );
-              decorations.forEach(async (d) => {
-                if (d.document === doc.uri) {
-                  await doc.buffer.setVirtualText(virtualTextSrcId, d.range.start.line, [[d.message, 'CocCodeLens']]);
-                }
-              });
-            }
-          }
-        },
-      })
-    );
+          },
+        })
+      );
+    } else {
+      await reloadSchemaFromEndpoint(apolloConfig);
+    }
   }
   // const config = workspace.getConfiguration('coc-apollo');
   const debug = true; // config.get<boolean>('debug');

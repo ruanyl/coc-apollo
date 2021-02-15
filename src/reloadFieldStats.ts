@@ -11,7 +11,7 @@ export const cachedFieldStats: { fieldStats: FieldStats } = {
 
 export async function reloadFieldStats(apolloConfig: ApolloConfigFormat) {
   // Load schema stats
-  const res = await fetch('https://graphql.api.apollographql.com/api/graphql', {
+  const { data, errors } = (await fetch('https://graphql.api.apollographql.com/api/graphql', {
     method: 'POST',
     headers: {
       'x-api-key': apolloConfig?.engine?.apiKey,
@@ -21,21 +21,25 @@ export async function reloadFieldStats(apolloConfig: ApolloConfigFormat) {
       query: print(FIELD_STATS),
       variables: { id: apolloConfig?.client.service },
     },
-  });
+  })) as any;
 
-  (res as any).data.service.stats.fieldStats.forEach((fieldStat) => {
-    // Parse field "ParentType.fieldName:FieldType" into ["ParentType", "fieldName", "FieldType"]
-    const [parentType = null, fieldName = null] = fieldStat.groupBy.field ? fieldStat.groupBy.field.split(/\.|:/) : [];
+  if (!errors) {
+    data.service.stats.fieldStats.forEach((fieldStat) => {
+      // Parse field "ParentType.fieldName:FieldType" into ["ParentType", "fieldName", "FieldType"]
+      const [parentType = null, fieldName = null] = fieldStat.groupBy.field
+        ? fieldStat.groupBy.field.split(/\.|:/)
+        : [];
 
-    if (!parentType || !fieldName) {
-      return;
-    }
-    const fieldsMap =
-      cachedFieldStats.fieldStats.get(parentType) ||
-      cachedFieldStats.fieldStats.set(parentType, new Map()).get(parentType)!;
+      if (!parentType || !fieldName) {
+        return;
+      }
+      const fieldsMap =
+        cachedFieldStats.fieldStats.get(parentType) ||
+        cachedFieldStats.fieldStats.set(parentType, new Map()).get(parentType)!;
 
-    fieldsMap.set(fieldName, fieldStat.metrics.fieldHistogram.durationMs);
-  });
+      fieldsMap.set(fieldName, fieldStat.metrics.fieldHistogram.durationMs);
+    });
 
-  return cachedFieldStats.fieldStats;
+    return cachedFieldStats.fieldStats;
+  }
 }

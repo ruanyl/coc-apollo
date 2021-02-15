@@ -1,4 +1,4 @@
-# coc-apollo-graphql (WIP)
+# coc-apollo (WIP)
 
 coc.nvim extension for Apollo GraphQL. Still work in progress, feedbacks and PRs are welcome.
 

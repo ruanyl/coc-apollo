@@ -1,6 +1,6 @@
 import { BasicList, ListAction, ListContext, ListItem, Neovim } from 'coc.nvim';
 import { ApolloConfigFormat } from './apollo';
-import { reloadSchema } from './reloadSchema';
+import { reloadSchemaFromEngine } from './reloadSchema';
 import { cachedVariants, reloadSchemaVariants } from './reloadSchemaVariants';
 
 export default class ApolloVariantList extends BasicList {
@@ -15,7 +15,7 @@ export default class ApolloVariantList extends BasicList {
     this.apolloConfig = apolloConfig;
 
     this.addAction('open', (item: ListItem) => {
-      reloadSchema(this.apolloConfig, item.data.name);
+      reloadSchemaFromEngine(this.apolloConfig, item.data.name);
     });
   }
 

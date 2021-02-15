@@ -15,7 +15,7 @@ export async function reloadSchemaVariants(apolloConfig: ApolloConfigFormat): Pr
   try {
     // Load schema variants & stats
     window.showMessage(`Variants Loading...`);
-    const res = await fetch('https://graphql.api.apollographql.com/api/graphql', {
+    const { data, errors } = (await fetch('https://graphql.api.apollographql.com/api/graphql', {
       method: 'POST',
       headers: {
         'x-api-key': apolloConfig?.engine?.apiKey,
@@ -25,13 +25,19 @@ export async function reloadSchemaVariants(apolloConfig: ApolloConfigFormat): Pr
         query: print(SCHEMA_TAGS),
         variables: { id: apolloConfig?.client.service },
       },
-    });
-    window.showMessage('Variants Loaded!');
-    const variants = (res as any).data.service.variants;
-    cachedVariants.variants = variants;
-    return variants;
+    })) as any;
+
+    if (!errors) {
+      const variants = data.service.variants;
+      cachedVariants.variants = variants;
+      window.showMessage('Variants Loaded!');
+      return variants;
+    }
+    return [];
   } catch (e) {
-    window.showMessage(`${e}`);
+    window.showMessage(
+      `Failed to load schema variants, please make sure APOLLO_KEY is set and 'service' is configured property`
+    );
     return [];
   }
 }

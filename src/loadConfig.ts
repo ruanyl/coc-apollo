@@ -5,7 +5,7 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import merge from 'lodash.merge';
 import { CocApolloGraphqlExtensionError } from './errors';
-import { ApolloConfigFormat } from './apollo';
+import { ApolloConfigFormat, ApolloEngineConfigFormat, ClientServiceConfig } from './apollo';
 import { getServiceFromKey } from './utils';
 
 // config settings
@@ -45,18 +45,26 @@ export async function loadConfig({ configPath }: LoadConfigSettings) {
   }
 
   if (!apiKey) {
-    throw new CocApolloGraphqlExtensionError('No Apollo API Key fond, make sure it is set in .env');
+    console.warn('No Apollo API Key found');
+    // throw new CocApolloGraphqlExtensionError('No Apollo API Key found, make sure it is set in .env');
   }
 
-  const engineConfig = { engine: { apiKey } };
-  let service = '';
+  let engineConfig: ApolloEngineConfigFormat = {};
+  if (apiKey) {
+    engineConfig = { engine: { apiKey } };
+  }
+
+  let service: string | ClientServiceConfig = '';
 
   if (loadedConfig && loadedConfig.config.client) {
-    if ('service' in loadedConfig.config.client) {
-      if (typeof loadedConfig.config.client.service === 'string') {
-        service = loadedConfig.config.client.service;
-      } else if ('name' in loadedConfig.config.client.service) {
-        service = loadedConfig.config.client.service.name;
+    if ('service' in loadedConfig.config.client && loadedConfig.config.client.service) {
+      service = loadedConfig.config.client.service;
+      if (typeof service !== 'string') {
+        if ('url' in service) {
+          service.kind = 'RemoteServiceConfig';
+        } else if ('localSchemaFile' in service) {
+          service.kind = 'LocalServiceConfig';
+        }
       }
     }
   }
@@ -66,7 +74,9 @@ export async function loadConfig({ configPath }: LoadConfigSettings) {
   }
 
   if (!service) {
-    throw new CocApolloGraphqlExtensionError('No Apollo service name found');
+    throw new CocApolloGraphqlExtensionError(
+      'No Apollo service found, please make sure it is configured property in apollo.config'
+    );
   }
 
   const config: ApolloConfigFormat = merge(engineConfig, { client: { service } });

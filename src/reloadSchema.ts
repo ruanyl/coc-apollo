@@ -1,6 +1,14 @@
 import { fetch, window, workspace } from 'coc.nvim';
 import fs from 'fs';
-import { buildSchema, GraphQLSchema, print } from 'graphql';
+import {
+  buildClientSchema,
+  buildSchema,
+  getIntrospectionQuery,
+  GraphQLSchema,
+  IntrospectionQuery,
+  print,
+  printSchema,
+} from 'graphql';
 import { ApolloConfigFormat } from './apollo';
 import { SCHEMA_DOCUMENT } from './operations.graphql';
 
@@ -46,30 +54,65 @@ export const cachedSchema: { source: string; schema: GraphQLSchema | null } = {
   schema: null,
 };
 
-export async function reloadSchema(apolloConfig: ApolloConfigFormat, variant: string) {
+export async function reloadSchemaFromEngine(apolloConfig: ApolloConfigFormat, variant: string) {
   try {
     // Load schema Introspection, variants & stats
     window.showMessage(`Loading schema of: ${variant}...`);
-    const res = await fetch('https://graphql.api.apollographql.com/api/graphql', {
+    const { data, errors } = (await fetch('https://graphql.api.apollographql.com/api/graphql', {
       method: 'POST',
       headers: {
-        'x-api-key': apolloConfig?.engine?.apiKey,
+        'x-api-key': apolloConfig.engine?.apiKey,
       },
       data: {
         operationName: 'schemaDocument',
         query: print(SCHEMA_DOCUMENT),
         variables: { id: apolloConfig?.client.service, tag: variant },
       },
-    });
+    })) as any;
 
-    cachedSchema.source = (res as any).data.service.schema.document + '\n' + apolloClientSchema;
-    cachedSchema.schema = buildSchema(cachedSchema.source);
+    if (!errors) {
+      cachedSchema.source = data.service.schema.document + '\n' + apolloClientSchema;
+      cachedSchema.schema = buildSchema(cachedSchema.source);
 
-    // Write schema Introspection
-    fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
-    window.showMessage(`Schema(${variant}) loaded: ${workspace.root}/schema.graphql`);
+      // Write schema to file for language server
+      fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
+      window.showMessage(`Schema(${variant}) loaded: ${workspace.root}/schema.graphql`);
+    }
   } catch (e) {
     console.error(e);
     window.showMessage(`Failed to load schema of variant: ${variant}`);
+  }
+}
+
+export async function reloadSchemaFromEndpoint(apolloConfig: ApolloConfigFormat) {
+  const serviceConfig = apolloConfig.client.service;
+  if (typeof serviceConfig !== 'string') {
+    if (serviceConfig.kind === 'RemoteServiceConfig') {
+      try {
+        window.showMessage(`Loading schema from ${serviceConfig.url}`);
+        const { data, errors } = (await fetch(serviceConfig.url, {
+          method: 'POST',
+          headers: serviceConfig.headers,
+          data: {
+            operationName: 'IntrospectionQuery',
+            query: getIntrospectionQuery(),
+          },
+        })) as any;
+        if (!errors) {
+          console.error(data);
+          cachedSchema.schema = buildClientSchema(data as IntrospectionQuery);
+          cachedSchema.source = printSchema(cachedSchema.schema);
+
+          // Write schema to file for language server
+          fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
+          window.showMessage(`Schema(${serviceConfig.url}) loaded: ${workspace.root}/schema.graphql`);
+        }
+      } catch (e) {
+        console.error(e);
+        window.showMessage(
+          `Failed to load schema from ${serviceConfig.url}, please make sure the graphql service is running`
+        );
+      }
+    }
   }
 }
