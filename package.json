@@ -1,6 +1,6 @@
 {
-  "name": "coc-apollo-graphql",
-  "version": "0.1.1",
+  "name": "coc-apollo",
+  "version": "0.1.2",
   "description": "coc.nvim extension for Apollo GraphQL",
   "author": "ruanyl <ruanyu1@gmail.com>",
   "license": "MIT",
@@ -42,12 +42,12 @@
   "contributes": {
     "configuration": {
       "type": "object",
-      "title": "coc-apollo-graphql configuration",
+      "title": "coc-apollo configuration",
       "properties": {
-        "coc-apollo-graphql.enabled": {
+        "coc-apollo.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Enable coc-apollo-graphql extension"
+          "description": "Enable coc-apollo extension"
         }
       }
     },

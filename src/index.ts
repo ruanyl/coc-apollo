@@ -23,7 +23,7 @@ const SupportedFiletype = ['graphql', 'javascript', 'javascriptreact', 'typescri
 
 export async function activate(context: ExtensionContext): Promise<void> {
   const apolloConfig = await loadConfig({ configPath: workspace.root });
-  const virtualTextSrcId = await workspace.nvim.createNamespace('coc-apollo-graphql');
+  const virtualTextSrcId = await workspace.nvim.createNamespace('coc-apollo');
 
   if (apolloConfig) {
     await reloadSchema(apolloConfig, 'current');
@@ -70,7 +70,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       })
     );
   }
-  // const config = workspace.getConfiguration('coc-apollo-graphql');
+  // const config = workspace.getConfiguration('coc-apollo');
   const debug = true; // config.get<boolean>('debug');
 
   const serverModule = context.asAbsolutePath('./lib/languageServer.js');
@@ -109,13 +109,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     revealOutputChannelOn: RevealOutputChannelOn.Never,
   };
 
-  const client = new LanguageClient(
-    'coc-apollo-graphql',
-    'GraphQL Language Server',
-    serverOptions,
-    clientOptions,
-    debug
-  );
+  const client = new LanguageClient('coc-apollo', 'GraphQL Language Server', serverOptions, clientOptions, debug);
 
   context.subscriptions.push(services.registLanguageClient(client));
 }

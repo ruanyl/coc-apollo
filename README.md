@@ -4,7 +4,7 @@ coc.nvim extension for Apollo GraphQL. Still work in progress, feedbacks and PRs
 
 ## Install
 
-`:CocInstall coc-apollo-graphql`
+`:CocInstall coc-apollo`
 
 ## Features
 ### Client Project
