@@ -12,14 +12,14 @@ coc.nvim extension for Apollo GraphQL. Still work in progress, feedbacks and PRs
 2. Apollo GraphQL integration (Use the Apollo schema registry)
     - Graph variants switching
     - Performance stats (require `virtual text`)
-3. Support loading schema from a remote endpoint, [example](https://www.apollographql.com/docs/devtools/apollo-config/#option-2-link-a-schema-from-a-remote-endpoint)
+3. Support loading schema from a remote endpoint, [example config](https://www.apollographql.com/docs/devtools/apollo-config/#option-2-link-a-schema-from-a-remote-endpoint)
 
 ### Service project
 TODO...
 
 ## Setup
 1. Add `APOLLO_KEY` to `.env`
-2. Add `apollo.config.json` or `apollo.config.js`
+2. Add `apollo.config.json` or `apollo.config.js`, [config details](https://www.apollographql.com/docs/devtools/apollo-config/)
 2. Add [graphql-config](https://github.com/kamilkisiela/graphql-config) for graphql language server
 3. (Optional) Use [vim-graphql](https://github.com/jparise/vim-graphql) for syntax highlighting
 
