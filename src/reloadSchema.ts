@@ -83,6 +83,7 @@ export async function reloadSchemaFromEngine(apolloConfig: ApolloConfigFormat, v
         // Write schema to file for language server
         fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
         window.showMessage(`Schema(${variant}) loaded: ${workspace.root}/schema.graphql`);
+        workspace.nvim.setVar('coc_apollo_current_variant', `${variant}`, true);
       } else {
         console.error(errors);
       }

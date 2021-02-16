@@ -84,8 +84,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
       await reloadSchemaFromEndpoint(apolloConfig);
     }
   }
-  // const config = workspace.getConfiguration('coc-apollo');
-  const debug = true; // config.get<boolean>('debug');
+  const config = workspace.getConfiguration('apollo');
+  const debug = config.get<boolean>('debug');
 
   const serverModule = context.asAbsolutePath('./lib/languageServer.js');
 

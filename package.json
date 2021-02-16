@@ -44,10 +44,15 @@
       "type": "object",
       "title": "coc-apollo configuration",
       "properties": {
-        "coc-apollo.enabled": {
+        "apollo.enabled": {
           "type": "boolean",
           "default": true,
           "description": "Enable coc-apollo extension"
+        },
+        "apollo.debug": {
+          "type": "boolean",
+          "default": true,
+          "description": "Debug graphql language server"
         }
       }
     },
