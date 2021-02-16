@@ -33,6 +33,35 @@ Example `graphql.config.json`
 }
 ```
 
+## Setup status line
+![statusline](https://user-images.githubusercontent.com/486382/108122730-69b42980-70ad-11eb-9c70-b99e216d2373.png)
+```vimscript
+function! LightlineCocApolloStatus() abort
+  let status = get(g:, 'coc_apollo_current_variant', '')
+  if empty(status)
+    return ''
+  endif
+  return '🚀 ' . status
+endfunction
+
+let g:lightline = {
+  \ 'active': {
+  \   'left': [
+  \     [ 'mode', 'paste' ],
+  \     [ 'readonly', 'filename' ]
+  \   ],
+  \   'right':[
+  \     [ 'filetype', 'lineinfo', 'percent', 'cocstatus' ],
+  \     [ 'cocapollo' ]
+  \   ],
+  \ },
+  \ 'component_function': {
+  \   'cocapollo': 'LightlineCocApolloStatus'
+  \ }
+\ }
+
+```
+
 ## Lists
 
 Show variant list: 
