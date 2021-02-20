@@ -12,3 +12,8 @@ yarn-error.log
 .eslintrc.js
 .prettierrc
 .eslintrc.js
+.env
+schema.graphql
+apollo.config.js
+apollo.config.json
+graphql.config.json

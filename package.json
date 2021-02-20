@@ -53,6 +53,11 @@
           "type": "boolean",
           "default": true,
           "description": "Debug graphql language server"
+        },
+        "apollo.defaultVariant": {
+          "type": "string",
+          "default": "current",
+          "description": "The default apollo graph variant to download when the plugin been initially loaded"
         }
       }
     },

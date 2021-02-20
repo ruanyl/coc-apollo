@@ -24,11 +24,12 @@ const SupportedFiletype = ['graphql', 'javascript', 'javascriptreact', 'typescri
 export async function activate(context: ExtensionContext): Promise<void> {
   const apolloConfig = await loadConfig({ configPath: workspace.root });
   const virtualTextSrcId = await workspace.nvim.createNamespace('coc-apollo');
-  console.error('apolloConfig: ', apolloConfig);
+  const config = workspace.getConfiguration('apollo');
+
+  let defaultVariant = config.get<string>('defaultVariant', 'current');
 
   if (apolloConfig) {
     if (typeof apolloConfig.client.service === 'string') {
-      let defaultVariant = 'current';
       if (apolloConfig.client.service.includes('@')) {
         defaultVariant = apolloConfig.client.service.split('@')[1];
       }
@@ -84,7 +85,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
       await reloadSchemaFromEndpoint(apolloConfig);
     }
   }
-  const config = workspace.getConfiguration('apollo');
   const debug = config.get<boolean>('debug');
 
   const serverModule = context.asAbsolutePath('./lib/languageServer.js');

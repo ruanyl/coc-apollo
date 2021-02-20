@@ -3,3 +3,5 @@ node_modules
 lib
 schema.json
 schema.graphql
+apollo.config.js
+apollo.config.json

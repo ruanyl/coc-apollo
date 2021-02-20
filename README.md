@@ -33,6 +33,10 @@ Example `graphql.config.json`
 }
 ```
 
+## Configurations
+
+`apollo.defaultVariant` the default apollo graph variant to download when the plugin been initially loaded, default: current
+
 ## Setup status line
 ![statusline](https://user-images.githubusercontent.com/486382/108122730-69b42980-70ad-11eb-9c70-b99e216d2373.png)
 ```vimscript
