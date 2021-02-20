@@ -1,4 +1,4 @@
-import { fetch, window, workspace } from 'coc.nvim';
+import { fetch, window, workspace, Uri } from 'coc.nvim';
 import fs from 'fs';
 import {
   buildClientSchema,
@@ -8,9 +8,13 @@ import {
   IntrospectionQuery,
   print,
   printSchema,
+  parse,
+  Source,
 } from 'graphql';
+import { extname, resolve } from 'path';
 import { ApolloConfigFormat } from './apollo';
 import { ApolloGraphQLEndpoint } from './config';
+import { CocApolloGraphqlExtensionError } from './errors';
 import { SCHEMA_DOCUMENT } from './operations.graphql';
 import { getServiceIDFromConfig } from './utils';
 
@@ -108,10 +112,17 @@ export async function reloadSchemaFromEndpoint(apolloConfig: ApolloConfigFormat)
             query: getIntrospectionQuery(),
           },
         })) as any;
+
         if (!errors) {
           console.error(data);
-          cachedSchema.schema = buildClientSchema(data as IntrospectionQuery);
-          cachedSchema.source = printSchema(cachedSchema.schema);
+          // Build schema from introspection
+          let schema = buildClientSchema(data as IntrospectionQuery);
+
+          // Combine schema with Apollo client schema
+          cachedSchema.source = printSchema(schema) + '\n' + apolloClientSchema;
+          schema = buildSchema(cachedSchema.source);
+
+          cachedSchema.schema = schema;
 
           // Write schema to file for language server
           fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
@@ -122,6 +133,48 @@ export async function reloadSchemaFromEndpoint(apolloConfig: ApolloConfigFormat)
         window.showMessage(
           `Failed to load schema from ${serviceConfig.url}, please make sure the graphql service is running`
         );
+      }
+    }
+  }
+}
+
+export function reloadSchemaFromLocal(apolloConfig: ApolloConfigFormat) {
+  const serviceConfig = apolloConfig.client.service;
+  if (typeof serviceConfig !== 'string') {
+    if (serviceConfig.kind === 'LocalServiceConfig') {
+      const localSchemaFile = Array<string>().concat(serviceConfig.localSchemaFile);
+      if (localSchemaFile.length > 0) {
+        window.showMessage(`Loading schema from: ${localSchemaFile.join(', ')}...`);
+        const schemaDefs = localSchemaFile.map((path) => {
+          let content = '';
+          try {
+            content = fs.readFileSync(path).toString();
+          } catch (e) {
+            console.error(`Unable to read file ${path}. ${e}`);
+          }
+
+          const ext = extname(path);
+
+          if (ext === '.json') {
+            const json = JSON.parse(content);
+            const __schema = json.data ? json.data.__schema : json.__schema ? json.__schema : json;
+            const schema = buildClientSchema({ __schema });
+            return printSchema(schema);
+          } else if (['.graphql', '.graphqls', '.gql'].includes(ext)) {
+            return content;
+          }
+          throw new CocApolloGraphqlExtensionError(
+            'Unsupported file type in `localSchemaFile`. Must be a .json, .graphql, .gql, or .graphqls file'
+          );
+        });
+        if (schemaDefs) {
+          cachedSchema.source = [...schemaDefs, apolloClientSchema].join('\n');
+          cachedSchema.schema = buildSchema(cachedSchema.source);
+
+          // Write schema to file for language server
+          fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
+          window.showMessage(`Schema loaded:  ${workspace.root}/schema.graphql`);
+        }
       }
     }
   }

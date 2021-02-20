@@ -16,7 +16,7 @@ import ApolloVariantList from './lists';
 import { loadConfig } from './loadConfig';
 import { cachedFieldStats, reloadFieldStats } from './reloadFieldStats';
 import { generateDecorations } from './parse';
-import { reloadSchemaFromEngine, cachedSchema, reloadSchemaFromEndpoint } from './reloadSchema';
+import { reloadSchemaFromEngine, cachedSchema, reloadSchemaFromEndpoint, reloadSchemaFromLocal } from './reloadSchema';
 import { reloadSchemaVariants } from './reloadSchemaVariants';
 
 const SupportedFiletype = ['graphql', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact'];
@@ -81,11 +81,13 @@ export async function activate(context: ExtensionContext): Promise<void> {
           },
         })
       );
-    } else {
+    } else if (apolloConfig.client.service.kind === 'RemoteServiceConfig') {
       await reloadSchemaFromEndpoint(apolloConfig);
+    } else if (apolloConfig.client.service.kind === 'LocalServiceConfig') {
+      reloadSchemaFromLocal(apolloConfig);
     }
   }
-  const debug = config.get<boolean>('debug');
+  const debug = config.get<boolean>('debug', false);
 
   const serverModule = context.asAbsolutePath('./lib/languageServer.js');
 
