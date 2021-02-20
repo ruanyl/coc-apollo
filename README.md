@@ -13,6 +13,7 @@ coc.nvim extension for Apollo GraphQL. Still work in progress, feedbacks and PRs
     - Graph variants switching
     - Performance stats (require `virtual text`)
 3. Support loading schema from a remote endpoint, [example config](https://www.apollographql.com/docs/devtools/apollo-config/#option-2-link-a-schema-from-a-remote-endpoint)
+4. Support loading schema from local: [example config](https://www.apollographql.com/docs/devtools/apollo-config/#option-3-link-a-schema-from-a-local-file)
 
 ### Service project
 TODO...
