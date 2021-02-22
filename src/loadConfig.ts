@@ -7,6 +7,7 @@ import merge from 'lodash.merge';
 import { CocApolloGraphqlExtensionError } from './errors';
 import { ApolloConfigFormat, ApolloEngineConfigFormat, ClientServiceConfig } from './apollo';
 import { getServiceFromKey } from './utils';
+import { CosmiconfigResult } from 'cosmiconfig/dist/types';
 
 // config settings
 const MODULE_NAME = 'apollo';
@@ -27,12 +28,17 @@ interface LoadConfigSettings {
 }
 
 export async function loadConfig({ configPath }: LoadConfigSettings) {
-  const explorer = cosmiconfig(MODULE_NAME, {
-    searchPlaces: defaultFileNames,
-    loaders,
-  });
+  let loadedConfig: CosmiconfigResult = null;
+  try {
+    const explorer = cosmiconfig(MODULE_NAME, {
+      searchPlaces: defaultFileNames,
+      loaders,
+    });
 
-  const loadedConfig = await explorer.search(configPath);
+    loadedConfig = await explorer.search(configPath);
+  } catch (e) {
+    console.error(e);
+  }
   let apiKey = '';
 
   const dotEnvPath = configPath ? path.resolve(configPath, envFileName) : path.resolve(process.cwd(), envFileName);

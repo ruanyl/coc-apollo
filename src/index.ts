@@ -23,7 +23,7 @@ const SupportedFiletype = ['graphql', 'javascript', 'javascriptreact', 'typescri
 
 export async function activate(context: ExtensionContext): Promise<void> {
   const apolloConfig = await loadConfig({ configPath: workspace.root });
-  const virtualTextSrcId = await workspace.nvim.createNamespace('coc-apollo');
+  const virtualTextSrcId = await workspace.nvim.createNamespace('coc-apollo-virtual');
   const config = workspace.getConfiguration('apollo');
 
   let defaultVariant = config.get<string>('defaultVariant', 'current');

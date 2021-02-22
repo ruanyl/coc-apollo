@@ -1,4 +1,4 @@
-import { fetch, window, workspace, Uri } from 'coc.nvim';
+import { fetch, window, workspace } from 'coc.nvim';
 import fs from 'fs';
 import {
   buildClientSchema,
@@ -8,10 +8,8 @@ import {
   IntrospectionQuery,
   print,
   printSchema,
-  parse,
-  Source,
 } from 'graphql';
-import { extname, resolve } from 'path';
+import { extname } from 'path';
 import { ApolloConfigFormat } from './apollo';
 import { ApolloGraphQLEndpoint } from './config';
 import { CocApolloGraphqlExtensionError } from './errors';
@@ -81,13 +79,17 @@ export async function reloadSchemaFromEngine(apolloConfig: ApolloConfigFormat, v
       })) as any;
 
       if (!errors) {
-        cachedSchema.source = data.service.schema.document + '\n' + apolloClientSchema;
-        cachedSchema.schema = buildSchema(cachedSchema.source);
+        if (data.service.schema) {
+          cachedSchema.source = data.service.schema.document + '\n' + apolloClientSchema;
+          cachedSchema.schema = buildSchema(cachedSchema.source);
 
-        // Write schema to file for language server
-        fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
-        window.showMessage(`Schema(${variant}) loaded: ${workspace.root}/schema.graphql`);
-        workspace.nvim.setVar('coc_apollo_current_variant', `${variant}`, true);
+          // Write schema to file for language server
+          fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
+          window.showMessage(`Schema(${variant}) loaded: ${workspace.root}/schema.graphql`);
+          workspace.nvim.setVar('coc_apollo_current_variant', `${variant}`, true);
+        } else {
+          window.showMessage(`Schema(${variant}) not found`);
+        }
       } else {
         console.error(errors);
       }
