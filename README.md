@@ -20,9 +20,9 @@ TODO...
 
 ## Setup
 1. Add `APOLLO_KEY` to `.env`
-2. Add `apollo.config.json` or `apollo.config.js`, [config details](https://www.apollographql.com/docs/devtools/apollo-config/)
 2. Add [graphql-config](https://github.com/kamilkisiela/graphql-config) for graphql language server
-3. (Optional) Use [vim-graphql](https://github.com/jparise/vim-graphql) for syntax highlighting
+3. (Optional) Add `apollo.config.json` or `apollo.config.js`, [config details](https://www.apollographql.com/docs/devtools/apollo-config/)
+4. (Optional) Use [vim-graphql](https://github.com/jparise/vim-graphql) for syntax highlighting
 
 The plugin will download schema from Apollo Schema Registry, it generates `schema.graphql` file. So you have to specify `"schema": "schema.graphql"` in the config.
 
