@@ -16,7 +16,9 @@
     "clean": "rimraf lib",
     "watch": "node esbuild.js --watch",
     "build": "node esbuild.js",
-    "prepare": "npm-run-all clean build"
+    "prepare": "npm-run-all clean build",
+    "prepublish": "npm-run-all clean build",
+    "release": "standard-version --releaseCommitMessageFormat 'chore(release): {{currentTag}} [skip ci]'"
   },
   "prettier": {
     "singleQuote": true,
@@ -34,6 +36,7 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^2.2.0",
     "rimraf": "^3.0.2",
+    "standard-version": "^9.1.1",
     "typescript": "^4.1.2"
   },
   "activationEvents": [
