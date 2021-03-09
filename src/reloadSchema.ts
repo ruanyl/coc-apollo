@@ -1,19 +1,20 @@
-import { fetch, window, workspace } from 'coc.nvim';
-import fs from 'fs';
 import {
+  GraphQLSchema,
+  IntrospectionQuery,
   buildClientSchema,
   buildSchema,
   getIntrospectionQuery,
-  GraphQLSchema,
-  IntrospectionQuery,
   print,
   printSchema,
 } from 'graphql';
-import { extname } from 'path';
+import { fetch, window, workspace } from 'coc.nvim';
+
 import { ApolloConfigFormat } from './apollo';
 import { ApolloGraphQLEndpoint } from './config';
 import { CocApolloGraphqlExtensionError } from './errors';
 import { SCHEMA_DOCUMENT } from './operations.graphql';
+import { extname } from 'path';
+import fs from 'fs';
 import { getServiceIDFromConfig } from './utils';
 
 export const apolloClientSchema = `#graphql
@@ -116,7 +117,6 @@ export async function reloadSchemaFromEndpoint(apolloConfig: ApolloConfigFormat)
         })) as any;
 
         if (!errors) {
-          console.error(data);
           // Build schema from introspection
           let schema = buildClientSchema(data as IntrospectionQuery);
 
