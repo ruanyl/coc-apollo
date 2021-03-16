@@ -57,10 +57,15 @@
           "default": true,
           "description": "Debug graphql language server"
         },
-        "apollo.defaultVariant": {
+        "apollo.default.variant": {
           "type": "string",
           "default": "current",
           "description": "The default apollo graph variant to download when the plugin been initially loaded"
+        },
+        "apollo.schema.filename": {
+          "type": "string",
+          "default": "schema.graphql",
+          "description": "The filename to write schema, support .json, .graphql and .gql"
         }
       }
     },

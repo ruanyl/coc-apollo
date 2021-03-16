@@ -6,8 +6,10 @@ import {
   getIntrospectionQuery,
   print,
   printSchema,
+  introspectionFromSchema,
 } from 'graphql';
 import { fetch, window, workspace } from 'coc.nvim';
+import path from 'path';
 
 import { ApolloConfigFormat } from './apollo';
 import { ApolloGraphQLEndpoint } from './config';
@@ -59,6 +61,37 @@ export const cachedSchema: { source: string; schema: GraphQLSchema | null } = {
   schema: null,
 };
 
+function getExportedFileInfo(filename: string) {
+  let filetype: 'graphql' | 'json' = 'graphql';
+
+  const ext = path.extname(filename);
+
+  switch (ext) {
+    case '.graphql':
+    case '.gql':
+      filetype = 'graphql';
+      break;
+    case '.json':
+      filetype = 'json';
+      break;
+    default:
+      break;
+  }
+
+  return [filename, filetype];
+}
+
+function writeSchemaToFile(schema: GraphQLSchema, fname = 'schema.graphql') {
+  const [filename, filetype] = getExportedFileInfo(fname);
+
+  if (filetype === 'graphql') {
+    fs.writeFileSync(`${workspace.root}/${filename}`, printSchema(schema));
+  }
+  if (filetype === 'json') {
+    fs.writeFileSync(`${workspace.root}/${filename}`, JSON.stringify(introspectionFromSchema(schema), null, 2));
+  }
+}
+
 export async function reloadSchemaFromEngine(apolloConfig: ApolloConfigFormat, variant: string) {
   const serviceConfig = apolloConfig.client.service;
   if (typeof serviceConfig === 'string') {
@@ -85,8 +118,11 @@ export async function reloadSchemaFromEngine(apolloConfig: ApolloConfigFormat, v
           cachedSchema.schema = buildSchema(cachedSchema.source);
 
           // Write schema to file for language server
-          fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
-          window.showMessage(`Schema(${variant}) loaded: ${workspace.root}/schema.graphql`);
+          const config = workspace.getConfiguration('apollo');
+          const filename = config.get<string>('schema.filename', 'schema.graphql');
+          writeSchemaToFile(cachedSchema.schema, filename);
+
+          window.showMessage(`Schema(${variant}) loaded: ${workspace.root}/${filename}`);
           workspace.nvim.setVar('coc_apollo_current_variant', `${variant}`, true);
         } else {
           window.showMessage(`Schema(${variant}) not found`);
@@ -128,8 +164,11 @@ export async function reloadSchemaFromEndpoint(apolloConfig: ApolloConfigFormat)
           cachedSchema.schema = schema;
 
           // Write schema to file for language server
-          fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
-          window.showMessage(`Schema(${serviceConfig.url}) loaded: ${workspace.root}/schema.graphql`);
+          const config = workspace.getConfiguration('apollo');
+          const filename = config.get<string>('schema.filename', 'schema.graphql');
+          writeSchemaToFile(cachedSchema.schema, filename);
+
+          window.showMessage(`Schema(${serviceConfig.url}) loaded: ${workspace.root}/${filename}`);
         }
       } catch (e) {
         console.error(e);
@@ -175,8 +214,11 @@ export function reloadSchemaFromLocal(apolloConfig: ApolloConfigFormat) {
           cachedSchema.schema = buildSchema(cachedSchema.source);
 
           // Write schema to file for language server
-          fs.writeFileSync(`${workspace.root}/schema.graphql`, cachedSchema.source);
-          window.showMessage(`Schema loaded:  ${workspace.root}/schema.graphql`);
+          const config = workspace.getConfiguration('apollo');
+          const filename = config.get<string>('schema.filename', 'schema.graphql');
+          writeSchemaToFile(cachedSchema.schema, filename);
+
+          window.showMessage(`Schema loaded:  ${workspace.root}/${filename}`);
         }
       }
     }

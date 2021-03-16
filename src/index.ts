@@ -22,11 +22,17 @@ import { reloadSchemaVariants } from './reloadSchemaVariants';
 const SupportedFiletype = ['graphql', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact'];
 
 export async function activate(context: ExtensionContext): Promise<void> {
+  const config = workspace.getConfiguration('apollo');
+  const enabled = config.get<boolean>('enabled', true);
+
+  if (!enabled) {
+    return;
+  }
+
   const apolloConfig = await loadConfig({ configPath: workspace.root });
   const virtualTextSrcId = await workspace.nvim.createNamespace('coc-apollo-virtual');
-  const config = workspace.getConfiguration('apollo');
 
-  let defaultVariant = config.get<string>('defaultVariant', 'current');
+  let defaultVariant = config.get<string>('default.variant', 'current');
 
   if (apolloConfig) {
     if (typeof apolloConfig.client.service === 'string') {
