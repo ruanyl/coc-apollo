@@ -24,15 +24,23 @@ TODO...
 3. (Optional) Add `apollo.config.json` or `apollo.config.js`, [config details](https://www.apollographql.com/docs/devtools/apollo-config/)
 4. (Optional) Use [vim-graphql](https://github.com/jparise/vim-graphql) for syntax highlighting
 
-The plugin will download schema from Apollo Schema Registry, it generates `schema.graphql` file. So you have to specify `"schema": "schema.graphql"` in the config.
+## Configure graphql.config.json
+The plugin will download schema from Apollo Schema Registry/local schema/remote schema, it generates `schema.graphql` file by default. So you have to specify `"schema": "schema.graphql"` in the config in order for language server to read.
 
 Example `graphql.config.json`
 ```json
 {
-  "schema": "schema.graphql",
-  "documents": "src/**/*.{ts}"
+  "schema": "schema.graphql"
 }
 ```
+
+You can also customize the exported schema filename and type with `:CocConfig`
+```
+{
+  "apollo.schema.filename": "schema.json"
+}
+```
+This will output the file in json format by converting the schema to schema introspection
 
 ## Configurations
 
