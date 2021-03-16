@@ -93,6 +93,7 @@ export async function reloadSchemaFromEngine(apolloConfig: ApolloConfigFormat, v
         }
       } else {
         console.error(errors);
+        window.showMessage(`${errors[0].message}`);
       }
     } catch (e) {
       console.error(e);

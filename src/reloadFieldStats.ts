@@ -47,6 +47,7 @@ export async function reloadFieldStats(apolloConfig: ApolloConfigFormat) {
       });
     } else {
       console.error(errors);
+      window.showMessage(`${errors[0].message}`);
     }
   }
 

@@ -37,6 +37,7 @@ export async function reloadSchemaVariants(apolloConfig: ApolloConfigFormat): Pr
         window.showMessage('Variants Loaded!');
       } else {
         console.error(errors);
+        window.showMessage(`${errors[0].message}`);
       }
       return cachedVariants.variants;
     } catch (e) {
