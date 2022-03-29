@@ -1,6 +1,6 @@
 {
   "name": "coc-apollo",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "coc.nvim extension for Apollo GraphQL",
   "author": "ruanyl <ruanyu1@gmail.com>",
   "license": "MIT",
